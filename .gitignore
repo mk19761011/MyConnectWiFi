@@ -1,0 +1,22 @@
+# Flet / Python
+build/
+clean_build/
+tmp/
+backup/
+__pycache__/
+*.pyc
+*.log
+
+# IDE / Editor
+.vscode/
+.idea/
+.flet/
+
+# Android / Flutter generated
+android/
+ios/
+linux/
+macos/
+web/
+windows/
+local.properties
