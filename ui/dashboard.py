@@ -39,12 +39,13 @@ class Dashboard(ft.Container):
             padding=20,
         )
         
-        # FAB (新規追加ボタン)
-        self.fab = ft.FloatingActionButton(
-            icon="add",
+        # 追加ボタン
+        self.add_button = ft.IconButton(
+            icon="add_circle",
+            icon_size=40,
             on_click=self._on_add_wifi_clicked,
             tooltip="Wi-Fi設定を追加",
-            bgcolor="blue",
+            icon_color="blue",
         )
         
         super().__init__(
@@ -66,6 +67,8 @@ class Dashboard(ft.Container):
                         ft.Column([
                             self.status_text,
                         ], horizontal_alignment=ft.CrossAxisAlignment.END),
+                        ft.Container(width=10),
+                        self.add_button,
                     ]),
                     padding=20,
                     bgcolor="surfacevariant",

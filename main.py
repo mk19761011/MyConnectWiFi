@@ -28,9 +28,6 @@ def main(page: ft.Page):
             page=page
         )
         
-        # FABを追加
-        page.floating_action_button = dashboard.fab
-        
         # ページに追加
         page.add(dashboard)
         
