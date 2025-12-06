@@ -17,7 +17,14 @@ class StorageManager:
         self.config_file = os.path.join(storage_dir, "config.json")
         
         # ディレクトリが存在しない場合は作成
-        os.makedirs(storage_dir, exist_ok=True)
+        try:
+            os.makedirs(storage_dir, exist_ok=True)
+        except PermissionError:
+            # Androidなどで権限がない場合、カレントディレクトリ（アプリ領域）を使用
+            storage_dir = os.path.join(os.getcwd(), "app_data")
+            self.storage_dir = storage_dir
+            self.config_file = os.path.join(storage_dir, "config.json")
+            os.makedirs(storage_dir, exist_ok=True)
     
     def _encrypt_password(self, password: str) -> str:
         """パスワードを簡易暗号化（Base64）"""
