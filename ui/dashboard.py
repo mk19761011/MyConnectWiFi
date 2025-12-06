@@ -135,19 +135,33 @@ class Dashboard(ft.Container):
     
     def _on_add_wifi_clicked(self, e):
         """Wi-Fi追加ボタンクリック"""
-        wifi_configs = self.storage_manager.get_wifi_configs()
-        current_count = len(wifi_configs)
-        
-        # 5つ目以降はライセンスチェック
-        if current_count >= 4:
-            license_info = self.storage_manager.get_license_info()
-            if not license_info.get("is_pro_unlocked", False):
-                # ライセンスダイアログを表示
-                self._show_license_dialog()
-                return
-        
-        # Wi-Fi追加ダイアログを表示
-        self._show_add_wifi_dialog()
+        try:
+            # デバッグ用：クリック反応確認
+            print("Add button clicked")
+            
+            wifi_configs = self.storage_manager.get_wifi_configs()
+            current_count = len(wifi_configs)
+            
+            # 5つ目以降はライセンスチェック
+            if current_count >= 4:
+                license_info = self.storage_manager.get_license_info()
+                if not license_info.get("is_pro_unlocked", False):
+                    # ライセンスダイアログを表示
+                    self._show_license_dialog()
+                    return
+            
+            # Wi-Fi追加ダイアログを表示
+            self._show_add_wifi_dialog()
+            
+        except Exception as ex:
+            import traceback
+            print(traceback.format_exc())
+            self.page.snack_bar = ft.SnackBar(
+                content=ft.Text(f"エラーが発生しました: {str(ex)}"),
+                bgcolor="red"
+            )
+            self.page.snack_bar.open = True
+            self.page.update()
     
     def _show_license_dialog(self):
         """ライセンスダイアログを表示"""
