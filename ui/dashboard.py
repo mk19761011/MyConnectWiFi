@@ -140,27 +140,42 @@ class Dashboard(ft.Container):
         """Wi-Fi追加ボタンクリック"""
         try:
             # デバッグ用：クリック反応確認
-            print("Add button clicked")
+            print("Add button clicked - START")
+            
+            # 即座に反応を表示
+            self.page.snack_bar = ft.SnackBar(
+                content=ft.Text("ボタンがクリックされました"),
+                bgcolor="blue"
+            )
+            self.page.snack_bar.open = True
+            self.page.update()
+            print("Add button clicked - SnackBar displayed")
             
             wifi_configs = self.storage_manager.get_wifi_configs()
             current_count = len(wifi_configs)
+            print(f"Add button clicked - Current count: {current_count}")
             
             # 5つ目以降はライセンスチェック
             if current_count >= 4:
+                print("Add button clicked - Checking license")
                 license_info = self.storage_manager.get_license_info()
                 if not license_info.get("is_pro_unlocked", False):
                     # ライセンスダイアログを表示
+                    print("Add button clicked - Showing license dialog")
                     self._show_license_dialog()
                     return
             
             # Wi-Fi追加ダイアログを表示
+            print("Add button clicked - Showing add wifi dialog")
             self._show_add_wifi_dialog()
+            print("Add button clicked - END")
             
         except Exception as ex:
             import traceback
-            print(traceback.format_exc())
+            error_msg = traceback.format_exc()
+            print(f"ERROR in _on_add_wifi_clicked: {error_msg}")
             self.page.snack_bar = ft.SnackBar(
-                content=ft.Text(f"エラーが発生しました: {str(ex)}"),
+                content=ft.Text(f"エラー: {str(ex)}"),
                 bgcolor="red"
             )
             self.page.snack_bar.open = True
@@ -186,17 +201,36 @@ class Dashboard(ft.Container):
     
     def _show_add_wifi_dialog(self):
         """Wi-Fi追加ダイアログを表示"""
-        wifi_configs = self.storage_manager.get_wifi_configs()
-        next_priority = len(wifi_configs) + 1
-        
-        dialog = AddWiFiDialog(
-            wifi_manager=self.wifi_manager,
-            on_save=self._on_wifi_added,
-            current_priority=next_priority
-        )
-        self.page.dialog = dialog
-        dialog.open = True
-        self.page.update()
+        try:
+            print("_show_add_wifi_dialog - START")
+            wifi_configs = self.storage_manager.get_wifi_configs()
+            next_priority = len(wifi_configs) + 1
+            print(f"_show_add_wifi_dialog - next_priority: {next_priority}")
+            
+            dialog = AddWiFiDialog(
+                wifi_manager=self.wifi_manager,
+                on_save=self._on_wifi_added,
+                current_priority=next_priority
+            )
+            print("_show_add_wifi_dialog - dialog created")
+            
+            self.page.dialog = dialog
+            dialog.open = True
+            print("_show_add_wifi_dialog - dialog.open set to True")
+            
+            self.page.update()
+            print("_show_add_wifi_dialog - page.update() called")
+            
+        except Exception as ex:
+            import traceback
+            error_msg = traceback.format_exc()
+            print(f"ERROR in _show_add_wifi_dialog: {error_msg}")
+            self.page.snack_bar = ft.SnackBar(
+                content=ft.Text(f"ダイアログエラー: {str(ex)}"),
+                bgcolor="red"
+            )
+            self.page.snack_bar.open = True
+            self.page.update()
     
     def _on_wifi_added(self, wifi: WiFiConfig, test_connection: bool = False):
         """Wi-Fi追加時"""
