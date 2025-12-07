@@ -155,23 +155,32 @@ class Dashboard(ft.Container):
                     self._show_license_dialog()
                     return
             
-            # Wi-Fi追加ダイアログを表示（デバッグ用シンプルダイアログ）
+            # Wi-Fi追加ダイアログを表示（デバッグ用BottomSheet）
             # self._show_add_wifi_dialog()
             
-            # テスト用シンプルダイアログ
-            simple_dialog = ft.AlertDialog(
-                title=ft.Text("テストダイアログ"),
-                content=ft.Text("これが表示されればダイアログ機能は正常です。"),
-                actions=[
-                    ft.TextButton("閉じる", on_click=lambda e: setattr(simple_dialog, 'open', False) or self.page.update())
-                ]
+            # テスト用BottomSheet（AlertDialogの代わり）
+            def close_bs(e):
+                bs.open = False
+                bs.update()
+            
+            bs = ft.BottomSheet(
+                content=ft.Container(
+                    content=ft.Column([
+                        ft.Text("テストBottomSheet", size=20, weight=ft.FontWeight.BOLD),
+                        ft.Container(height=10),
+                        ft.Text("これが表示されればBottomSheet機能は正常です。"),
+                        ft.Container(height=20),
+                        ft.ElevatedButton("閉じる", on_click=close_bs)
+                    ], tight=True),
+                    padding=30
+                ),
+                open=True,
             )
-            self.page.dialog = simple_dialog
-            simple_dialog.open = True
+            self.page.overlay.append(bs)
             self.page.update()
             
             # 完了時にステータスを戻す
-            print("Dialog opened")
+            print("BottomSheet opened")
             
         except Exception as ex:
             import traceback
