@@ -138,49 +138,43 @@ class Dashboard(ft.Container):
     
     def _on_add_wifi_clicked(self, e):
         """Wi-Fi追加ボタンクリック"""
-        # 最もシンプルなテスト：ステータステキストを変更するだけ
-        print("Button clicked!")
-        self.status_text.value = "ボタンが押されました！"
-        self.status_text.color = "orange"
-        self.update()
-        
-        # 元の処理（一旦コメントアウト）
-        # try:
-        #     print("Add button clicked - START")
-        #     self.page.snack_bar = ft.SnackBar(
-        #         content=ft.Text("ボタンがクリックされました"),
-        #         bgcolor="blue"
-        #     )
-        #     self.page.snack_bar.open = True
-        #     self.page.update()
-        #     print("Add button clicked - SnackBar displayed")
-        #     
-        #     wifi_configs = self.storage_manager.get_wifi_configs()
-        #     current_count = len(wifi_configs)
-        #     print(f"Add button clicked - Current count: {current_count}")
-        #     
-        #     if current_count >= 4:
-        #         print("Add button clicked - Checking license")
-        #         license_info = self.storage_manager.get_license_info()
-        #         if not license_info.get("is_pro_unlocked", False):
-        #             print("Add button clicked - Showing license dialog")
-        #             self._show_license_dialog()
-        #             return
-        #     
-        #     print("Add button clicked - Showing add wifi dialog")
-        #     self._show_add_wifi_dialog()
-        #     print("Add button clicked - END")
-        #     
-        # except Exception as ex:
-        #     import traceback
-        #     error_msg = traceback.format_exc()
-        #     print(f"ERROR in _on_add_wifi_clicked: {error_msg}")
-        #     self.page.snack_bar = ft.SnackBar(
-        #         content=ft.Text(f"エラー: {str(ex)}"),
-        #         bgcolor="red"
-        #     )
-        #     self.page.snack_bar.open = True
-        #     self.page.update()
+        try:
+            # 処理開始を表示
+            self.status_text.value = "処理中..."
+            self.status_text.color = "orange"
+            self.page.update()
+            
+            wifi_configs = self.storage_manager.get_wifi_configs()
+            current_count = len(wifi_configs)
+            
+            # 5つ目以降はライセンスチェック
+            if current_count >= 4:
+                license_info = self.storage_manager.get_license_info()
+                if not license_info.get("is_pro_unlocked", False):
+                    # ライセンスダイアログを表示
+                    self._show_license_dialog()
+                    return
+            
+            # Wi-Fi追加ダイアログを表示
+            self._show_add_wifi_dialog()
+            
+            # 完了時にステータスを戻す
+            # (ダイアログが閉じた後の処理はダイアログ側のコールバックで行われるが、
+            # ここでは開いたことを示すためにログを残す程度)
+            print("Dialog opened")
+            
+        except Exception as ex:
+            import traceback
+            print(traceback.format_exc())
+            # エラーをステータスにも表示
+            self.status_text.value = "エラー発生"
+            self.status_text.color = "red"
+            self.page.snack_bar = ft.SnackBar(
+                content=ft.Text(f"エラーが発生しました: {str(ex)}"),
+                bgcolor="red"
+            )
+            self.page.snack_bar.open = True
+            self.page.update()
     
     def _show_license_dialog(self):
         """ライセンスダイアログを表示"""
