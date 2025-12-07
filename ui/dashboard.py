@@ -244,7 +244,7 @@ class Dashboard(ft.Container):
             )
             
             # Wi-Fiリスト
-            wifi_list_column = ft.Column([], spacing=5, scroll=ft.ScrollMode.AUTO, height=200)
+            wifi_list_column = ft.Column([], spacing=2, scroll=ft.ScrollMode.AUTO, height=250)
             
             def on_network_click(ssid):
                 selected_ssid_ref["value"] = ssid
@@ -258,24 +258,25 @@ class Dashboard(ft.Container):
                 wifi_list_column.update()
                 print(f"Selected: {ssid}")
             
-            # ネットワークリストを構築
+            # ネットワークリストを構築（コンパクト表示）
             if networks:
                 for ssid in networks:
                     wifi_list_column.controls.append(
                         ft.Container(
-                            content=ft.ListTile(
-                                leading=ft.Icon("wifi"),
-                                title=ft.Text(ssid),
-                            ),
+                            content=ft.Row([
+                                ft.Icon("wifi", size=16),
+                                ft.Container(width=8),
+                                ft.Text(ssid, size=13),
+                            ]),
                             data=ssid,
                             on_click=lambda e, s=ssid: on_network_click(s),
                             border_radius=5,
-                            padding=5
+                            padding=ft.padding.symmetric(vertical=8, horizontal=10)
                         )
                     )
             else:
                 wifi_list_column.controls.append(
-                    ft.Text("Wi-Fiネットワークが見つかりませんでした", color="grey", italic=True)
+                    ft.Text("Wi-Fiネットワークが見つかりませんでした", color="grey", italic=True, size=12)
                 )
             
             def close_bs(e=None):
