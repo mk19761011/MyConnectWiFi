@@ -155,29 +155,8 @@ class Dashboard(ft.Container):
                     self._show_license_dialog()
                     return
             
-            # Wi-Fi追加ダイアログを表示（デバッグ用BottomSheet）
-            # self._show_add_wifi_dialog()
-            
-            # テスト用BottomSheet（AlertDialogの代わり）
-            def close_bs(e):
-                bs.open = False
-                bs.update()
-            
-            bs = ft.BottomSheet(
-                content=ft.Container(
-                    content=ft.Column([
-                        ft.Text("テストBottomSheet", size=20, weight=ft.FontWeight.BOLD),
-                        ft.Container(height=10),
-                        ft.Text("これが表示されればBottomSheet機能は正常です。"),
-                        ft.Container(height=20),
-                        ft.ElevatedButton("閉じる", on_click=close_bs)
-                    ], tight=True),
-                    padding=30
-                ),
-                open=True,
-            )
-            self.page.overlay.append(bs)
-            self.page.update()
+            # Wi-Fi追加BottomSheetを表示
+            self._show_add_wifi_bottomsheet()
             
             # 完了時にステータスを戻す
             print("BottomSheet opened")
@@ -241,6 +220,136 @@ class Dashboard(ft.Container):
             print(f"ERROR in _show_add_wifi_dialog: {error_msg}")
             self.page.snack_bar = ft.SnackBar(
                 content=ft.Text(f"ダイアログエラー: {str(ex)}"),
+                bgcolor="red"
+            )
+            self.page.snack_bar.open = True
+            self.page.update()
+    
+    def _show_add_wifi_bottomsheet(self):
+        """Wi-Fi追加BottomSheetを表示"""
+        try:
+            print("_show_add_wifi_bottomsheet - START")
+            
+            # Wi-Fiスキャン実行
+            networks = self.wifi_manager.scan_networks()
+            print(f"Scanned networks: {networks}")
+            
+            # 選択されたSSIDとパスワード入力欄
+            selected_ssid_ref = {"value": None}
+            password_field = ft.TextField(
+                label="パスワード",
+                password=True,
+                can_reveal_password=True,
+                width=400
+            )
+            
+            # Wi-Fiリスト
+            wifi_list_column = ft.Column([], spacing=5, scroll=ft.ScrollMode.AUTO, height=200)
+            
+            def on_network_click(ssid):
+                selected_ssid_ref["value"] = ssid
+                # 選択状態を更新
+                for ctrl in wifi_list_column.controls:
+                    if isinstance(ctrl, ft.Container):
+                        if ctrl.data == ssid:
+                            ctrl.bgcolor = "blue900"
+                        else:
+                            ctrl.bgcolor = None
+                wifi_list_column.update()
+                print(f"Selected: {ssid}")
+            
+            # ネットワークリストを構築
+            if networks:
+                for ssid in networks:
+                    wifi_list_column.controls.append(
+                        ft.Container(
+                            content=ft.ListTile(
+                                leading=ft.Icon("wifi"),
+                                title=ft.Text(ssid),
+                            ),
+                            data=ssid,
+                            on_click=lambda e, s=ssid: on_network_click(s),
+                            border_radius=5,
+                            padding=5
+                        )
+                    )
+            else:
+                wifi_list_column.controls.append(
+                    ft.Text("Wi-Fiネットワークが見つかりませんでした", color="grey", italic=True)
+                )
+            
+            def close_bs(e=None):
+                bs.open = False
+                bs.update()
+                # ステータスを戻す
+                self.status_text.value = "準備完了"
+                self.status_text.color = "green"
+                self.page.update()
+            
+            def save_wifi(e):
+                if not selected_ssid_ref["value"]:
+                    self.page.snack_bar = ft.SnackBar(
+                        content=ft.Text("Wi-Fiネットワークを選択してください"),
+                        bgcolor="orange"
+                    )
+                    self.page.snack_bar.open = True
+                    self.page.update()
+                    return
+                
+                password = password_field.value or ""
+                
+                # Wi-Fi設定を作成
+                from models.wifi_config import WiFiConfig
+                wifi_configs = self.storage_manager.get_wifi_configs()
+                next_priority = len(wifi_configs) + 1
+                
+                wifi = WiFiConfig(
+                    ssid=selected_ssid_ref["value"],
+                    password=password,
+                    priority=next_priority
+                )
+                
+                # 保存
+                self._on_wifi_added(wifi, test_connection=False)
+                close_bs()
+            
+            # BottomSheet構築
+            bs = ft.BottomSheet(
+                content=ft.Container(
+                    content=ft.Column([
+                        ft.Row([
+                            ft.Text("Wi-Fi追加", size=20, weight=ft.FontWeight.BOLD),
+                            ft.Container(expand=True),
+                            ft.IconButton(icon="close", on_click=close_bs)
+                        ]),
+                        ft.Divider(),
+                        ft.Text("利用可能なネットワーク", size=16),
+                        wifi_list_column,
+                        ft.Container(height=10),
+                        password_field,
+                        ft.Container(height=20),
+                        ft.Row([
+                            ft.TextButton("キャンセル", on_click=close_bs),
+                            ft.Container(expand=True),
+                            ft.ElevatedButton("保存", on_click=save_wifi, icon="save")
+                        ])
+                    ], tight=True, scroll=ft.ScrollMode.AUTO),
+                    padding=20,
+                    width=500
+                ),
+                open=True,
+            )
+            
+            self.page.overlay.append(bs)
+            self.page.update()
+            print("_show_add_wifi_bottomsheet - done")
+            
+        except Exception as ex:
+            import traceback
+            error_msg = traceback.format_exc()
+            print(f"ERROR in _show_add_wifi_bottomsheet: {error_msg}")
+            self.page.snack_bar = ft.SnackBar(
+                content=ft.Text(f"BottomSheetエラー: {str(ex)}"),
                 bgcolor="red"
             )
             self.page.snack_bar.open = True
