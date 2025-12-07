@@ -155,15 +155,23 @@ class Dashboard(ft.Container):
                     self._show_license_dialog()
                     return
             
-            # Wi-Fi追加ダイアログを表示
-            self._show_add_wifi_dialog()
+            # Wi-Fi追加ダイアログを表示（デバッグ用シンプルダイアログ）
+            # self._show_add_wifi_dialog()
+            
+            # テスト用シンプルダイアログ
+            simple_dialog = ft.AlertDialog(
+                title=ft.Text("テストダイアログ"),
+                content=ft.Text("これが表示されればダイアログ機能は正常です。"),
+                actions=[
+                    ft.TextButton("閉じる", on_click=lambda e: setattr(simple_dialog, 'open', False) or self.page.update())
+                ]
+            )
+            self.page.dialog = simple_dialog
+            simple_dialog.open = True
+            self.page.update()
             
             # 完了時にステータスを戻す
             print("Dialog opened")
-            # ここでupdateするとダイアログ表示と競合する可能性があるため削除
-            # self.status_text.value = "準備完了"
-            # self.status_text.color = "green"
-            # self.page.update()
             
         except Exception as ex:
             import traceback
