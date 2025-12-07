@@ -159,9 +159,10 @@ class Dashboard(ft.Container):
             self._show_add_wifi_dialog()
             
             # 完了時にステータスを戻す
-            # (ダイアログが閉じた後の処理はダイアログ側のコールバックで行われるが、
-            # ここでは開いたことを示すためにログを残す程度)
             print("Dialog opened")
+            self.status_text.value = "準備完了"
+            self.status_text.color = "green"
+            self.page.update()
             
         except Exception as ex:
             import traceback

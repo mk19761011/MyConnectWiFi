@@ -104,7 +104,14 @@ class AddWiFiDialog(ft.AlertDialog):
             actions_alignment=ft.MainAxisAlignment.END,
         )
         
-        # 初回スキャン
+        
+        # 初回スキャンはdid_mountで行う（UIフリーズ回避のため）
+        # self._load_scan_results() 
+        print("AddWiFiDialog initialized")
+
+    def did_mount(self):
+        """ダイアログが表示された後に実行"""
+        print("AddWiFiDialog did_mount")
         self._load_scan_results()
     
     def _on_tab_changed(self, e):
