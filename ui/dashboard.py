@@ -160,9 +160,10 @@ class Dashboard(ft.Container):
             
             # 完了時にステータスを戻す
             print("Dialog opened")
-            self.status_text.value = "準備完了"
-            self.status_text.color = "green"
-            self.page.update()
+            # ここでupdateするとダイアログ表示と競合する可能性があるため削除
+            # self.status_text.value = "準備完了"
+            # self.status_text.color = "green"
+            # self.page.update()
             
         except Exception as ex:
             import traceback
